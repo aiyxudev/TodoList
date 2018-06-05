@@ -45,21 +45,13 @@ var todoList = {
 
 
 var handlers = {
-	addTodo: function(){
-		var addTodoTextInput = document.getElementById('addTodoTextInput');
-		todoList.addTodo(addTodoTextInput.value);
-		addTodoTextInput.value = "";
-		view.displayTodos();
+	addTodo: function(textInput){
+		todoList.addTodo(textInput);
+		view.displayTodos();	
 	},
 	
-	changeTodo: function(){
-		var changeTodoPositionInput = document.getElementById('changeTodoPositionInput');
-		var changeTodoTextInput = document.getElementById('changeTodoTextInput');
-		
-		todoList.changeTodo(changeTodoPositionInput.valueAsNumber, changeTodoTextInput);
-		changeTodoPositionInput.value = "";
-		changeTodoTextInput.value = "";
-		
+	changeTodo: function(position,todoText){
+		todoList.changeTodo(position, todoText);
 		view.displayTodos();
 	},
 	
@@ -68,10 +60,8 @@ var handlers = {
 		view.displayTodos();
 	},
 	
-	toggleCompleted: function() {
-		var toggleCompletedPositionInput = document.getElementById('toggleCompletedPositionInput');
-		todoList.toggleCompleted(toggleCompletedPositionInput.valueAsNumber);
-        toggleCompletedPositionInput.value = "";
+	toggleCompleted: function(position) {
+		todoList.toggleCompleted(position);
 		view.displayTodos();
 	},
 	
@@ -100,9 +90,20 @@ var view = {
 			
 			todoLi.id = position;
 			todoLi.textContent = todoTextWithCompletion;
+			todoLi.appendChild(this.createEditButton());
 			todoLi.appendChild(this.createDeleteButton());
+			todoLi.appendChild(this.createToggleButton());
+			
 			todosUl.appendChild(todoLi);		
 		}, this);	
+	},
+	
+	//new code <- edit button on the side
+	createEditButton: function(){
+		var editButton = document.createElement("button");
+		editButton.textContent = "Edit";
+		editButton.className = "editButton";
+		return editButton;
 	},
 	
 	createDeleteButton: function(){
@@ -112,15 +113,40 @@ var view = {
 		return deleteButton;
 	},
 	
+	createToggleButton: function(){
+		var toggleButton = document.createElement("button");
+		toggleButton.textContent = "Toggle";
+		toggleButton.className = "toggleButton";
+		return toggleButton;
+	},
+	
+	
 	setUpEventListeners: function() {
 		var todosUl = document.querySelector("ul");
+		var addTodoTextInput = document.getElementById('addTodoTextInput');	 
 	
 		todosUl.addEventListener("click",function(event) {
 			var elementClicked = event.target;
 			if (elementClicked.className === "deleteButton"){
 				handlers.deleteTodo(parseInt(elementClicked.parentNode.id));
 			}
+
+			if (elementClicked.className === "editButton"){
+				var todoText = prompt('Edit');
+				handlers.changeTodo(parseInt(elementClicked.parentNode.id),todoText);
+			}
+			
+			if(elementClicked.className === "toggleButton"){
+				handlers.toggleCompleted(parseInt(elementClicked.parentNode.id));
+			}
 		});
+		
+		addTodoTextInput.addEventListener('keyup', function(event){
+			if (event.keyCode === 13){
+				handlers.addTodo(addTodoTextInput.value);
+				addTodoTextInput.value = "";
+			}
+		})
  	}
 };
 
